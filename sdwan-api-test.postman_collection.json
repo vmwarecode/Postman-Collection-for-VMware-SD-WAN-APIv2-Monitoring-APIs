@@ -1,0 +1,1330 @@
+{
+	"info": {
+		"_postman_id": "f35d94c4-7888-4518-a0b4-660715401e8b",
+		"name": "sdwan-api-test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login and obtain API TOKEN",
+			"item": [
+				{
+					"name": "Enterprise Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ed224ac7-f29f-416a-bbed-640a16daec80",
+								"exec": [
+									"pm.test('Status code is 200', () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const cookieSchema = {",
+									"  type: 'string',",
+									"  min: '1',",
+									"};",
+									"",
+									"pm.test('Set-Cookie header is present', () => {",
+									"  const header = pm.response.headers.get('Set-Cookie');",
+									"",
+									"  pm.expect(tv4.validate(header, cookieSchema)).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/portal/rest/login/enterpriseLogin",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"portal",
+								"rest",
+								"login",
+								"enterpriseLogin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create API Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cf12f620-f285-4fd8-9ac6-4541072d7866",
+								"exec": [
+									"pm.test('Status code is 200', () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"// pm.test('Schema is valid', () => {",
+									"//   pm.expect(tv4.validate(jsonData, schema)).to.be.true;",
+									"// });",
+									"",
+									"pm.collectionVariables.set('tokenId', jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"enterpriseUserId\": {{enterpriseUserId}},\n\t\"enterpriseId\": {{enterpriseId}},\n\t\"name\" : \"{{tokenName}}\",\n\t\"description\": \"{{tokenDescription}}\",\n\t\"lifetimeMs\": {{tokenExp}},\n}"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/portal/rest/enterprise/createApiToken",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"portal",
+								"rest",
+								"enterprise",
+								"createApiToken"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download API Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1f70f596-5f94-4f20-98eb-9e4d60b6bb84",
+								"exec": [
+									"pm.test('Status code is 200', () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set('token', jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"id\": {{tokenId}}\n}"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/portal/rest/enterprise/downloadApiToken",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"portal",
+								"rest",
+								"enterprise",
+								"downloadApiToken"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Edges",
+			"item": [
+				{
+					"name": "Create Edge",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "857d94af-834d-465d-95e7-ecbc31c0c9eb",
+								"exec": [
+									"pm.test('Status code is 201', () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.collectionVariables.set('edgeLogicalId', jsonData.logicalId);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"configuration\": {{configurationLogicalId}},\n\t\"name\": \"Test Edge\",\n\t\"modelNumber\": \"edge500\",\n\t\"site\": {\n\t    \"contactName\": \"Test Site Admin\",\n\t    \"contactEmail\": \"site@site.com\"\n\t},\n\t\"license\": {{licenseLogicalId}}\n}\n"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Edge",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Edge Collection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Edge",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/name\",\n\t\t    \"value\": \"Test Edge name change\"\n\t\t  },\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/description\",\n\t\t    \"value\": \"Test Edge description change\"\n\t\t  },\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/serialNumber\",\n\t\t    \"value\": \"Test Edge serialNumber change\"\n\t\t  },\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/customInfo\",\n\t\t    \"value\": \"Test Edge customInfo change\"\n\t\t  },\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/site/lat\",\n\t\t    \"value\": 41.25\n\t\t  },\n\t\t  {\n\t\t    \"op\": \"replace\",\n\t\t    \"path\": \"/site/lon\",\n\t\t    \"value\": -120.9762\n\t\t  }\n\t\t  \n]"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Edge",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e44d756a-b981-4125-9768-584c1287ee1f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9f33add2-86f4-4d5e-be7e-c4ce6974a8b4",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Enterprises",
+			"item": [
+				{
+					"name": "Get Enterprise",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Enterprise",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enterprises",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Enterprise",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Customer\",\n    \"operatorProfiles\": [\"eb577a68-273e-11eb-a639-0242ac130005\", \"eb5f04ec-273e-11eb-a639-0242ac130005\"],\n    \"gatewayPool\": \"eb87b02d-273e-11eb-a639-0242ac130005\",\n    \"user\": {\n        \"email\": \"{{enterpriseAdminUsername}}\",\n        \"username\": \"{{enterpriseAdminUsername}}\",\n        \"password\": \"{{enterpriseAdminPassword}}\",\n        \"password2\": \"{{enterpriseAdminPassword}}\"\n    },\n    \"enableEnterpriseDelegationToOperator\": true,\n    \"enableEnterpriseDelegationToProxy\": true,\n    \"enableEnterpriseUserManagementDelegationToOperator\": true,\n    \"endpointPkiMode\": \"CERTIFICATE_DISABLED\"\n}"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Health Stats",
+			"item": [
+				{
+					"name": "get Enterprise Aggregate Health stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/healthStats?metrics=tunnelCount,memoryPct&start=1597675803117&sortBy=tunnelCount:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"healthStats"
+							],
+							"query": [
+								{
+									"key": "metrics",
+									"value": "tunnelCount,memoryPct",
+									"description": "Allowed metrics: tunnelCount,memoryPct,flowCount,cpuPct,handoffQueueDrops"
+								},
+								{
+									"key": "start",
+									"value": "1597675803117",
+									"description": "start time in milliseconds"
+								},
+								{
+									"key": "sortBy",
+									"value": "tunnelCount:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Edge Health Stats Metrics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/healthStats?metrics=tunnelCount&start=1597675803117&sortBy=tunnelCount:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"healthStats"
+							],
+							"query": [
+								{
+									"key": "metrics",
+									"value": "tunnelCount",
+									"description": "Allowed metrics: tunnelCount,memoryPct,flowCount,cpuPct,handoffQueueDrops"
+								},
+								{
+									"key": "start",
+									"value": "1597675803117",
+									"description": "start time in milliseconds"
+								},
+								{
+									"key": "sortBy",
+									"value": "tunnelCount:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get Edge Health Stats Time Series",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/healthStats/timeSeries?metrics=tunnelCount&start=1597675803117&sortBy=tunnelCount:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"healthStats",
+								"timeSeries"
+							],
+							"query": [
+								{
+									"key": "metrics",
+									"value": "tunnelCount",
+									"description": "Allowed metrics: tunnelCount,memoryPct,flowCount,cpuPct,handoffQueueDrops"
+								},
+								{
+									"key": "start",
+									"value": "1597675803117",
+									"description": "start time in milliseconds"
+								},
+								{
+									"key": "sortBy",
+									"value": "tunnelCount:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Alerts",
+			"item": [
+				{
+					"name": "get Alerts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/alerts",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"alerts"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "get Events",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/events",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"events"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Flow Stats",
+			"item": [
+				{
+					"name": "GET enterprise aggregate flow stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/flowStats?start=1598037758567&groupBy=application&metrics=bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"flowStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "groupBy",
+									"value": "application",
+									"description": "Can be one of [link, application, applicationClass, destFQDN, segment, sourceMac, destDomain, sourceIp, destIp, destPort]"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount",
+									"description": "Allowed metrics: bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET edge flow stats metrics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/flowStats?start=1598037758567&groupBy=application&metrics=bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"flowStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "groupBy",
+									"value": "application",
+									"description": "Can be one of [link, application, applicationClass, destFQDN, segment, sourceMac, destDomain, sourceIp, destIp, destPort]"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount",
+									"description": "Allowed metrics: bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET edge flow stats timeSeries",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/flowStats/timeSeries?start=1598037758567&groupBy=application&metrics=bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"flowStats",
+								"timeSeries"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "groupBy",
+									"value": "application",
+									"description": "Can be one of [link, application, applicationClass, destFQDN, segment, sourceMac, destDomain, sourceIp, destIp, destPort]"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount",
+									"description": "Allowed metrics: bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Enterprise and edge flow stats APIs",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Link Stats",
+			"item": [
+				{
+					"name": "GET enterprise aggregate link stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/linkStats?start=1598037758567&metrics=bytesTx,bytesRx&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"linkStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567",
+									"description": "start time in milliseconds"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesTx,bytesRx",
+									"description": "Allowed metrics: bytesTx,bytesRx,packetsTx,packetsRx,bytesRx+bytesTx,packetsRx+packetsTx,p1BytesRx,p1BytesTx,p1PacketsRx,p1PacketsTx,p2BytesRx,p2BytesTx,p2PacketsRx,p2PacketsTx,p3BytesRx,p3BytesTx,p3PacketsRx,p3PacketsTx,controlBytesRx,controlBytesTx,controlPacketsRx,controlPacketsTx,bpsOfBestPathRx,bpsOfBestPathTx,bestJitterMsRx,bestJitterMsTx,bestLatencyMsRx,bestLatencyMsTx,bestLossPctRx,bestLossPctTx,scoreTx,scoreRx,signalStrength,state,"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET edge link stats metrics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/linkStats?start=1598037758567&metrics=bytesTx,bytesRx&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"linkStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesTx,bytesRx",
+									"description": "Allowed metrics: bytesTx,bytesRx,packetsTx,packetsRx,bytesRx,bytesTx,packetsRx,packetsTx,p1BytesRx,p1BytesTx,p1PacketsRx,p1PacketsTx,p2BytesRx,p2BytesTx,p2PacketsRx,p2PacketsTx,p3BytesRx,p3BytesTx,p3PacketsRx,p3PacketsTx,controlBytesRx,controlBytesTx,controlPacketsRx,controlPacketsTx,bpsOfBestPathRx,bpsOfBestPathTx,bestJitterMsRx,bestJitterMsTx,bestLatencyMsRx,bestLatencyMsTx,bestLossPctRx,bestLossPctTx,scoreTx,scoreRx,signalStrength,state"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET edge link stats timeSeries",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/linkStats/timeSeries?start=1598037758567&metrics=bytesTx,bytesRx&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"linkStats",
+								"timeSeries"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesTx,bytesRx",
+									"description": "Allowed metrics: bytesTx,bytesRx,packetsTx,packetsRx,bytesRx,bytesTx,packetsRx,packetsTx,p1BytesRx,p1BytesTx,p1PacketsRx,p1PacketsTx,p2BytesRx,p2BytesTx,p2PacketsRx,p2PacketsTx,p3BytesRx,p3BytesTx,p3PacketsRx,p3PacketsTx,controlBytesRx,controlBytesTx,controlPacketsRx,controlPacketsTx,bpsOfBestPathRx,bpsOfBestPathTx,bestJitterMsRx,bestJitterMsTx,bestLatencyMsRx,bestLatencyMsTx,bestLossPctRx,bestLossPctTx,scoreTx,scoreRx,signalStrength,state"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Enterprise and edge link stats APIs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b828de4d-6794-41bd-9f16-e9e6d2a86323",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b6cab299-3c70-4bac-a0c0-02321b8add5b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Client Devices",
+			"item": [
+				{
+					"name": "GET enterprise client devices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Token {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/flowStats?start=1598037758567&groupBy=application&metrics=bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"flowStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "groupBy",
+									"value": "application",
+									"description": "Can be one of [link, application, applicationClass, destFQDN, segment, sourceMac, destDomain, sourceIp, destIp, destPort]"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET enterprise client device with logicalId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/clientDevices/bc17d412-dea8-11ea-b346-0242c0a8a005",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"clientDevices",
+								"bc17d412-dea8-11ea-b346-0242c0a8a005"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Enterprise scoped client device APIs",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Link QoE",
+			"item": [
+				{
+					"name": "GET edge link QoE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Token {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/sdwan/enterprises/{{enterpriseLogicalId}}/edges/{{edgeLogicalId}}/flowStats?start=1598037758567&groupBy=application&metrics=bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount&sortBy=bytesTx:ASC",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"sdwan",
+								"enterprises",
+								"{{enterpriseLogicalId}}",
+								"edges",
+								"{{edgeLogicalId}}",
+								"flowStats"
+							],
+							"query": [
+								{
+									"key": "start",
+									"value": "1598037758567"
+								},
+								{
+									"key": "groupBy",
+									"value": "application",
+									"description": "Can be one of [link, application, applicationClass, destFQDN, segment, sourceMac, destDomain, sourceIp, destIp, destPort]"
+								},
+								{
+									"key": "metrics",
+									"value": "bytesRx,bytesTx,totalBytes,packetsRx,packetsTx,totalPackets,flowCount"
+								},
+								{
+									"key": "sortBy",
+									"value": "bytesTx:ASC",
+									"description": "Format of sortBy is `<metric>:[asc|desc]`"
+								},
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ac82b9ea-fa6d-4792-a003-f09d1aeb8799",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "298c72ed-42e9-44a1-ab31-8819aae0646a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "dc15d8ee-af93-4072-8ed3-1fb1f404c63a",
+			"key": "serverUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "503f606b-bc88-478b-ae73-f3d60d899106",
+			"key": "username",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "ffba1356-e06e-47c3-a1c2-1ee265156104",
+			"key": "password",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "0de184f5-69d0-4e22-b266-910be894390a",
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "54736dd4-2827-4263-8075-fb96d1483aa0",
+			"key": "enterpriseUserId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "9ecea68c-4b10-45de-be87-d8b6d43e115b",
+			"key": "enterpriseId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "22d6699c-d281-4dde-9a2c-e588113f7f65",
+			"key": "tokenName",
+			"value": "Test Token",
+			"type": "string"
+		},
+		{
+			"id": "6aebe997-18d8-4af0-aa7a-5e7b341abebc",
+			"key": "tokenDescription",
+			"value": "Test Token",
+			"type": "string"
+		},
+		{
+			"id": "69682403-f6f6-48c0-9605-076dad37513d",
+			"key": "tokenExp",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "e633736f-0bb2-4a91-9a57-ad0fd067cbd3",
+			"key": "tokenId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "0b0aa55b-9d2d-4e20-ae14-e38bc302f89e",
+			"key": "configurationLogicalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "19f73086-dee0-4332-a29d-7f8bc8d7f01b",
+			"key": "edgeName",
+			"value": "Test Edge",
+			"type": "string"
+		},
+		{
+			"id": "5f02514c-56d2-4ffa-96ac-830cffb044f4",
+			"key": "edgeModelNumber",
+			"value": "edge500",
+			"type": "string"
+		},
+		{
+			"id": "37d25939-c06f-432a-a781-7369e6bebd25",
+			"key": "license",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "d70bf9cb-a5ee-4088-a21a-e6ab5d2ad892",
+			"key": "enterpriseLogicalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "e8c09984-dacb-4306-bced-e61192ef18f7",
+			"key": "edgeLogicalId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "74e4b410-320b-4159-9511-43e2b34770c3",
+			"key": "operatorUserId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
